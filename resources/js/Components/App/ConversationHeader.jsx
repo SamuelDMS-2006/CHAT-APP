@@ -17,10 +17,37 @@ import { useState, useEffect } from "react";
 const ConversationHeader = ({ selectedConversation }) => {
     const page = usePage();
     const currentUser = page.props.auth.user;
-    const authUser = page.props.auth.user;
     const asesors = page.props.asesors;
     const { emit } = useEventBus();
     const [sortedAsesors, setSortedAsesors] = useState([]);
+
+    const status = [
+        {
+            id: 1,
+            name: "gris",
+            color: "gray",
+        },
+        {
+            id: 2,
+            name: "amarillo",
+            color: "yellow",
+        },
+        {
+            id: 3,
+            name: "verde",
+            color: "green",
+        },
+        {
+            id: 4,
+            name: "naranja",
+            color: "orange",
+        },
+        {
+            id: 5,
+            name: "rojo",
+            color: "red",
+        },
+    ];
 
     const onDeleteGroup = () => {
         if (!window.confirm("Are you sure you want to delete this group?")) {
@@ -52,6 +79,20 @@ const ConversationHeader = ({ selectedConversation }) => {
             });
     };
 
+    const changeStatus = (newStatus) => {
+        axios
+            .post(
+                route("user.changeStatus", [selectedConversation.id, newStatus])
+            )
+            .then((res) => {
+                emit("toast.show", res.data.message);
+                console.log(res.data);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    };
+
     useEffect(() => {
         if (asesors && asesors.length > 0) {
             const sorted = [...asesors].sort((a, b) =>
@@ -60,6 +101,8 @@ const ConversationHeader = ({ selectedConversation }) => {
             setSortedAsesors(sorted);
         }
     }, [asesors]);
+
+    console.log(!selectedConversation.is_admin);
 
     return (
         <>
@@ -93,7 +136,8 @@ const ConversationHeader = ({ selectedConversation }) => {
                             <GroupUsersPopover
                                 users={selectedConversation.users}
                             />
-                            {selectedConversation.owner_id == authUser.id && (
+                            {selectedConversation.owner_id ==
+                                currentUser.id && (
                                 <>
                                     <div
                                         className="tooltip tooltip-left"
@@ -126,59 +170,122 @@ const ConversationHeader = ({ selectedConversation }) => {
                             )}
                         </div>
                     )}
-
-                    {(currentUser.is_admin || currentUser.is_asesor) && (
-                        <div className="px-1 py-1">
-                            <Menu
-                                as="div"
-                                className="relative inline-block text-left w-full"
-                            >
-                                <Menu.Button className="flex w-full items-center rounded-md px-2 py-2 text-sm text-gray-100 hover:bg-black/30">
-                                    <UserIcon className="w-4 h-4 mr-2" />
-                                    Asign Asesor
-                                </Menu.Button>
-                                <Transition
-                                    as={Fragment}
-                                    enter="transition ease-out duration-100"
-                                    enterFrom="transform opacity-0 scale-95"
-                                    enterTo="transform opacity-100 scale-100"
-                                    leave="transition ease-in duration-75"
-                                    leaveFrom="transform opacity-100 scale-100"
-                                    leaveTo="transform opacity-0 scale-95"
+                    {!selectedConversation.is_admin &&
+                        !selectedConversation.is_asesor &&
+                        currentUser.is_asesor && (
+                            <div className="flex flex-row gap-2 items-start">
+                                <Menu
+                                    as="div"
+                                    className="relative inline-block text-left"
                                 >
-                                    <Menu.Items className="absolute right-full top-0 ml-2 w-48 rounded-md bg-gray-800 shadow-lg z-50">
-                                        <div className="px-1 py-1">
-                                            {sortedAsesors &&
-                                                sortedAsesors.map((asesor) => (
-                                                    <Menu.Item key={asesor.id}>
-                                                        {({ active }) => (
-                                                            <button
-                                                                onClick={() =>
-                                                                    asignAsesor(
-                                                                        asesor.id
-                                                                    )
-                                                                }
-                                                                className={`${
-                                                                    active
-                                                                        ? "bg-black/30 text-white"
-                                                                        : "text-gray-100"
-                                                                } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                                    <Menu.Button className="flex items-center rounded-md px-3 py-2 text-sm text-gray-100 hover:bg-black/30 bg-gray-700">
+                                        <UserIcon className="w-4 h-4 mr-2" />
+                                        Asign Asesor
+                                    </Menu.Button>
+                                    <Transition
+                                        as={Fragment}
+                                        enter="transition ease-out duration-100"
+                                        enterFrom="transform opacity-0 scale-95"
+                                        enterTo="transform opacity-100 scale-100"
+                                        leave="transition ease-in duration-75"
+                                        leaveFrom="transform opacity-100 scale-100"
+                                        leaveTo="transform opacity-0 scale-95"
+                                    >
+                                        <Menu.Items className="absolute light-full top-10 right-0 ml-2 w-48 rounded-md bg-gray-800 shadow-lg z-50">
+                                            <div className="px-1 py-1">
+                                                {sortedAsesors &&
+                                                    sortedAsesors.map(
+                                                        (asesor) => (
+                                                            <Menu.Item
+                                                                key={asesor.id}
                                                             >
-                                                                <h3 className="text-sm font-semibold overflow-hidden text-ellipsis whitespace-nowrap">
-                                                                    {
-                                                                        asesor.name
+                                                                {({
+                                                                    active,
+                                                                }) => (
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            asignAsesor(
+                                                                                asesor.id
+                                                                            )
+                                                                        }
+                                                                        className={`${
+                                                                            active
+                                                                                ? "bg-black/30 text-white"
+                                                                                : "text-gray-100"
+                                                                        } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                                                                    >
+                                                                        <h3 className="text-sm font-semibold overflow-hidden text-ellipsis whitespace-nowrap">
+                                                                            {
+                                                                                asesor.name
+                                                                            }
+                                                                        </h3>
+                                                                    </button>
+                                                                )}
+                                                            </Menu.Item>
+                                                        )
+                                                    )}
+                                            </div>
+                                        </Menu.Items>
+                                    </Transition>
+                                </Menu>
+
+                                <Menu
+                                    as="div"
+                                    className="relative inline-block text-left"
+                                >
+                                    <Menu.Button className="flex items-center rounded-md px-3 py-2 text-sm text-gray-100 hover:bg-black/30 bg-gray-700">
+                                        <UserIcon className="w-4 h-4 mr-2" />
+                                        Cambiar Estado
+                                    </Menu.Button>
+                                    <Transition
+                                        as={Fragment}
+                                        enter="transition ease-out duration-100"
+                                        enterFrom="transform opacity-0 scale-95"
+                                        enterTo="transform opacity-100 scale-100"
+                                        leave="transition ease-in duration-75"
+                                        leaveFrom="transform opacity-100 scale-100"
+                                        leaveTo="transform opacity-0 scale-95"
+                                    >
+                                        <Menu.Items className="absolute light-full top-10 right-0 ml-2 w-48 rounded-md bg-gray-800 shadow-lg z-50">
+                                            <div className="px-1 py-1">
+                                                {status &&
+                                                    status.map((status) => (
+                                                        <Menu.Item
+                                                            key={status.id}
+                                                        >
+                                                            {({ active }) => (
+                                                                <button
+                                                                    onClick={() =>
+                                                                        changeStatus(
+                                                                            status.id
+                                                                        )
                                                                     }
-                                                                </h3>
-                                                            </button>
-                                                        )}
-                                                    </Menu.Item>
-                                                ))}
-                                        </div>
-                                    </Menu.Items>
-                                </Transition>
-                            </Menu>
-                        </div>
-                    )}
+                                                                    className={`${
+                                                                        active
+                                                                            ? "bg-black/30 text-white"
+                                                                            : "text-gray-100"
+                                                                    } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                                                                >
+                                                                    <div className="flex justify-between items-center w-full">
+                                                                        <h3 className="text-sm font-semibold overflow-hidden text-ellipsis whitespace-nowrap">
+                                                                            {
+                                                                                status.name
+                                                                            }
+                                                                        </h3>
+                                                                        <div
+                                                                            className={`w-3 h-3 bg-${status.color}-500 rounded-full ml-2`}
+                                                                        ></div>
+                                                                    </div>
+                                                                </button>
+                                                            )}
+                                                        </Menu.Item>
+                                                    ))}
+                                            </div>
+                                        </Menu.Items>
+                                    </Transition>
+                                </Menu>
+                            </div>
+                        )}
                 </div>
             )}
         </>

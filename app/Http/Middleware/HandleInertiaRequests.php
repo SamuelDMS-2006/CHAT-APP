@@ -40,11 +40,11 @@ class HandleInertiaRequests extends Middleware
             ],
             'conversations' => Auth::id() ? Conversation::getConversationsForSidebar(Auth::user()) : [],
             'asesors' => Auth::id() ? User::getAsesors(Auth::user()) : [],
-            'splitUsers' => [
-                'admins' => User::getUsersExceptUser(Auth::user(), 'admin'),
-                'asesores' => User::getUsersExceptUser(Auth::user(), 'asesor'),
-                'usuarios' => User::getUsersExceptUser(Auth::user(), 'usuario'),
-            ],
+            'splitUsers' => Auth::id() ? [
+                'admins' => User::getUsersExceptUser(Auth::user(), 'admin')->map->toConversationArray(),
+                'asesores' => User::getUsersExceptUser(Auth::user(), 'asesor')->map->toConversationArray(),
+                'usuarios' => User::getUsersExceptUser(Auth::user(), 'usuario')->map->toConversationArray(),
+            ] : [],
         ];
     }
 }

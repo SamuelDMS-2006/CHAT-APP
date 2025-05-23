@@ -34,14 +34,10 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
         Route::post('/user/set-asesor/{user}', [UserController::class, 'setRoleAsesor'])->name('user.setRoleAsesor');
         Route::post('/user/set-admin/{user}', [UserController::class, 'setRoleAdmin'])->name('user.setRoleAdmin');
         Route::post('/users/{user}/asign-asesor/{asesor}', [UserController::class, 'asignAsesor'])->name('user.asignAsesor');
+        Route::post('/users/{user}/change-status/{newStatus}', [UserController::class, 'changeStatus'])->name('user.changeStatus');
 
         Route::post('/user/block-unblock/{user}', [UserController::class, 'blockUnblock'])
             ->name('user.blockUnblock');
-    });
-
-    Route::middleware(['asesor'])->group(function () {
-        Route::post('/users/{user}/asign-asesor/{asesor}', [UserController::class, 'asignAsesor'])->name('user.asignAsesor');
-        Route::post('/user/set-asesor/{user}', [UserController::class, 'setRoleAsesor'])->name('user.setRoleAsesor');
     });
 });
 

@@ -20,11 +20,12 @@ class UserController extends Controller
             'email' => ['required', 'email', 'unique:users,email'],
             'is_admin' => 'boolean',
             'is_asesor' => 'boolean',
+            'code_status' => 'int',
             'asesor' => 'int',
         ]);
 
         $rawPassword = $request->password; // Guardas la versión sin encriptar
-        $data = $request->only('name', 'email', 'is_admin', 'is_asesor', 'asesor');
+        $data = $request->only('name', 'email', 'is_admin', 'is_asesor', 'code_status', 'asesor');
         $data['password'] = bcrypt($rawPassword); // Encriptas
         $data['email_verified_at'] = now();
 
@@ -64,6 +65,17 @@ class UserController extends Controller
         $user->update(['asesor' => (int) $asesorId]);
 
         $message = "Asesor asignado correctamente.";
+
+        Mail::to($user)->send(new UserRoleChanged($user));
+
+        return response()->json(['message' => $message]);
+    }
+
+    public function changeStatus(User $user, $code_status)
+    {
+        $user->update(['code_status' => (int) $code_status]);
+
+        $message = "Estado asignado correctamente.";
 
         Mail::to($user)->send(new UserRoleChanged($user));
 

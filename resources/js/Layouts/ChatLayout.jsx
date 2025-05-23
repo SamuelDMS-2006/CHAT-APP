@@ -18,19 +18,17 @@ const ChatLayout = ({ children }) => {
     const [showGroupModal, setShowGroupModal] = useState(false);
     const { emit, on } = useEventBus();
     const currentUser = page.props.auth.user;
-
-    console.log(admins);
-
-    const isUserOnline = (userId) => onlineUsers[userId];
+    const [searchTerm, setSearchTerm] = useState("");
 
     const onSearch = (ev) => {
         const search = ev.target.value.toLowerCase();
-        setLocalConversations(
-            conversations.filter((conversation) => {
-                return conversation.name.toLowerCase().includes(search);
-            })
-        );
+        setSearchTerm(search);
     };
+
+    const filterBySearch = (list) =>
+        list.filter((c) => c.name.toLowerCase().includes(searchTerm));
+
+    const isUserOnline = (userId) => onlineUsers[userId];
 
     const messageCreated = (message) => {
         setLocalConversations((oldUsers) => {
@@ -65,7 +63,6 @@ const ChatLayout = ({ children }) => {
             return;
         }
 
-        // Find the conversation by prevMessage and updated its last_message_id and date
         messageCreated(prevMessage);
     };
 
@@ -194,8 +191,9 @@ const ChatLayout = ({ children }) => {
                             />
                         </div>
                         <div className="flex-1 overflow-auto">
-                            {sortedConversations &&
-                                sortedConversations.map((conversation) => (
+                            <div className="p-3">
+                                Admins
+                                {filterBySearch(admins).map((conversation) => (
                                     <ConversationItem
                                         key={`${
                                             conversation.is_group
@@ -209,6 +207,49 @@ const ChatLayout = ({ children }) => {
                                         }
                                     />
                                 ))}
+                            </div>
+                            <div className="p-3">
+                                Asesors
+                                {filterBySearch(asesores).map(
+                                    (conversation) => (
+                                        <ConversationItem
+                                            key={`${
+                                                conversation.is_group
+                                                    ? "group_"
+                                                    : "user_"
+                                            }${conversation.id}`}
+                                            conversation={conversation}
+                                            online={
+                                                !!isUserOnline(conversation.id)
+                                            }
+                                            selectedConversation={
+                                                selectedConversation
+                                            }
+                                        />
+                                    )
+                                )}
+                            </div>
+                            <div className="p-3">
+                                Users
+                                {filterBySearch(usuarios).map(
+                                    (conversation) => (
+                                        <ConversationItem
+                                            key={`${
+                                                conversation.is_group
+                                                    ? "group_"
+                                                    : "user_"
+                                            }${conversation.id}`}
+                                            conversation={conversation}
+                                            online={
+                                                !!isUserOnline(conversation.id)
+                                            }
+                                            selectedConversation={
+                                                selectedConversation
+                                            }
+                                        />
+                                    )
+                                )}
+                            </div>
                         </div>
                     </div>
                     <div className="flex-1 flex flex-col overflow-hidden">
