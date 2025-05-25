@@ -25,27 +25,27 @@ const ConversationHeader = ({ selectedConversation }) => {
         {
             id: 1,
             name: "gris",
-            color: "gray",
+            color: "bg-gray-500",
         },
         {
             id: 2,
             name: "amarillo",
-            color: "yellow",
+            color: "bg-yellow-500",
         },
         {
             id: 3,
             name: "verde",
-            color: "green",
+            color: "bg-green-500",
         },
         {
             id: 4,
             name: "naranja",
-            color: "orange",
+            color: "bg-orange-500",
         },
         {
             id: 5,
             name: "rojo",
-            color: "red",
+            color: "bg-red-500",
         },
     ];
 
@@ -101,8 +101,6 @@ const ConversationHeader = ({ selectedConversation }) => {
             setSortedAsesors(sorted);
         }
     }, [asesors]);
-
-    console.log(!selectedConversation.is_admin);
 
     return (
         <>
@@ -273,7 +271,7 @@ const ConversationHeader = ({ selectedConversation }) => {
                                                                             }
                                                                         </h3>
                                                                         <div
-                                                                            className={`w-3 h-3 bg-${status.color}-500 rounded-full ml-2`}
+                                                                            className={`w-3 h-3 ${status.color} rounded-full ml-2`}
                                                                         ></div>
                                                                     </div>
                                                                 </button>

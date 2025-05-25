@@ -20,6 +20,7 @@ const ConversationItem = ({
         ) {
             classes = "bg-black/20";
         }
+
         if (
             selectedConversation.is_group &&
             conversation.is_group &&
@@ -28,6 +29,39 @@ const ConversationItem = ({
             classes = "bg-black/20";
         }
     }
+
+    const color_status = [
+        {
+            id: 1,
+            name: "gris",
+            color: "border-gray-500",
+        },
+        {
+            id: 2,
+            name: "amarillo",
+            color: "border-yellow-500",
+        },
+        {
+            id: 3,
+            name: "verde",
+            color: "border-green-500",
+        },
+        {
+            id: 4,
+            name: "naranja",
+            color: "border-orange-500",
+        },
+        {
+            id: 5,
+            name: "rojo",
+            color: "border-red-500",
+        },
+    ];
+
+    const statusColor =
+        color_status.find((s) => s.id === conversation.code_status)?.color ??
+        "border-gray-500";
+
     return (
         <Link
             href={
@@ -37,7 +71,7 @@ const ConversationItem = ({
             }
             preserveState
             className={
-                "conversation-item flex items-center gap-2 p-2 text-gray-300 transition-all cursor-pointer border-l-4 hover:bg-black/30 border-blue-500 " +
+                `conversation-item flex items-center gap-2 p-2 mb-2 text-gray-300 transition-all cursor-pointer border-l-4 hover:bg-black/30 ${statusColor} ` +
                 classes +
                 (conversation.is_user && currentUser.is_admin
                     ? " pr-2"

@@ -40,7 +40,6 @@ class UserController extends Controller
     public function setRoleAdmin(User $user)
     {
         $user->update(['is_admin' => !(bool) $user->is_admin]);
-
         $message = "User role was changed into " . ($user->is_admin ? '"Admin"' : '"Regular User"');
 
         Mail::to($user)->send(new UserRoleChanged($user));
@@ -51,7 +50,6 @@ class UserController extends Controller
     public function setRoleAsesor(User $user)
     {
         $user->update(['is_asesor' => !(bool) $user->is_asesor]);
-
         $message = "User role was changed into " . ($user->is_asesor ? '"Asesor"' : '"Regular User"');
 
         Mail::to($user)->send(new UserRoleChanged($user));
@@ -63,10 +61,7 @@ class UserController extends Controller
     public function asignAsesor(User $user, $asesorId)
     {
         $user->update(['asesor' => (int) $asesorId]);
-
         $message = "Asesor asignado correctamente.";
-
-        Mail::to($user)->send(new UserRoleChanged($user));
 
         return response()->json(['message' => $message]);
     }
@@ -74,10 +69,7 @@ class UserController extends Controller
     public function changeStatus(User $user, $code_status)
     {
         $user->update(['code_status' => (int) $code_status]);
-
         $message = "Estado asignado correctamente.";
-
-        Mail::to($user)->send(new UserRoleChanged($user));
 
         return response()->json(['message' => $message]);
     }
