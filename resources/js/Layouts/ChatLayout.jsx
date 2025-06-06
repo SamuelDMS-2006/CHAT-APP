@@ -132,7 +132,6 @@ const ChatLayout = ({ children }) => {
                 const onlineUsersObj = Object.fromEntries(
                     users.map((user) => [user.id, user])
                 );
-
                 setOnlineUsers((prevOnlineUsers) => {
                     return { ...prevOnlineUsers, ...onlineUsersObj };
                 });
@@ -185,6 +184,8 @@ const ChatLayout = ({ children }) => {
                         </div>
                         <div className="p-3">
                             <TextInput
+                                id="user-search"
+                                name="user-search"
                                 onKeyUp={onSearch}
                                 placeholder="Filter users and groups"
                                 className="w-full"

@@ -15,7 +15,7 @@ import AttachmentPreview from "./AttachmentPreview";
 import CustomAudioPlayer from "./CustomAudioPlayer";
 import AudioRecorder from "./AudioRecorder";
 
-const MessageInput = ({ conversation = null }) => {
+const MessageInput = ({ conversation = null, replyTo = null, onCancelReply }) => {
     const [newMessage, setNewMessage] = useState("");
     const [inputErrorMessage, setInputErrorMessage] = useState("");
     const [messageSending, setMessageSending] = useState(false);
@@ -41,6 +41,7 @@ const MessageInput = ({ conversation = null }) => {
         if (messageSending) {
             return;
         }
+
         if (newMessage.trim() === "" && chosenFiles.length === 0) {
             setInputErrorMessage(
                 "Please provide a message or upload attachments."
@@ -60,6 +61,9 @@ const MessageInput = ({ conversation = null }) => {
             formData.append("receiver_id", conversation.id);
         } else if (conversation.is_group) {
             formData.append("group_id", conversation.id);
+        }
+        if (replyTo) {
+            formData.append("reply_to_id", replyTo.id);
         }
 
         setMessageSending(true);
@@ -113,6 +117,15 @@ const MessageInput = ({ conversation = null }) => {
 
     return (
         <div className="flex flex-wrap items-start border-t border-slate-700 py-3">
+            {replyTo && (
+                <div className="w-full bg-gray-700 text-gray-200 p-2 rounded mb-2 flex justify-between items-center">
+                    <div>
+                        <span className="font-semibold">{replyTo.sender?.name}:</span>{" "}
+                        <span className="italic">{replyTo.message}</span>
+                    </div>
+                    <button onClick={onCancelReply} className="ml-2 text-red-400">Cancelar</button>
+                </div>
+            )}
             <div className="order-2 flex-1 xs:flex-none xs:order-1 p-2">
                 <button className="p-1 text-gray-400 hover:text-gray-300 relative overflow-hidden">
                     <PaperClipIcon className="w-6" />
@@ -138,6 +151,8 @@ const MessageInput = ({ conversation = null }) => {
             <div className="order-1 px-3 xs:p-0 min-w-[220px] basis-full xs:basis-0 xs:order-2 flex-1 relative">
                 <div className="flex ">
                     <NewMessageInput
+                        id="chat-message"
+                        name="chat-message"
                         value={newMessage}
                         onSend={onSendClick}
                         onChange={(ev) => setNewMessage(ev.target.value)}

@@ -25,8 +25,11 @@ class MessageResource extends JsonResource
             'sender' => new UserResource($this->sender),
             'group_id' => $this->group_id,
             'attachments' => MessageAttachmentResource::collection($this->attachments),
+            'reply_to_id' => $this->reply_to_id,
+            'reply_to' => $this->replyTo ? new MessageResource($this->replyTo) : null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'reactions' => $this->reactions_grouped ?? [],
         ];
     }
 }

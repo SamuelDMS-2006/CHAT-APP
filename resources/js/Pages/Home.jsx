@@ -8,6 +8,7 @@ import MessageItem from "@/Components/App/MessageItem";
 import MessageInput from "@/Components/App/MessageInput";
 import { useEventBus } from "@/EventBus";
 import AttachmentPreviewModal from "@/Components/App/AttachmentPreviewModal";
+import { Head } from "@inertiajs/react";
 
 function Home({ selectedConversation = null, messages = null }) {
     const [localMessages, setLocalMessages] = useState([]);
@@ -17,6 +18,7 @@ function Home({ selectedConversation = null, messages = null }) {
     const messagesCtrRef = useRef(null);
     const [showAttachmentPreview, setShowAttachmentPreview] = useState(false);
     const [previewAttachment, setPreviewAttachment] = useState({});
+    const [replyTo, setReplyTo] = useState(null);
     const { on } = useEventBus();
     const currentUser = usePage().props.auth.user;
 
@@ -162,6 +164,11 @@ function Home({ selectedConversation = null, messages = null }) {
         }
     }, [messages, currentUser]);
 
+    useEffect(() => {
+        const offReply = on("message.reply", ({ message }) => setReplyTo(message));
+        return () => offReply();
+    }, [on]);
+
     return (
         <>
             {!messages ? (
@@ -198,12 +205,17 @@ function Home({ selectedConversation = null, messages = null }) {
                                         key={message.id}
                                         message={message}
                                         attachmentClick={onAttachmentClick}
+                                        onReply={setReplyTo}
                                     />
                                 ))}
                             </div>
                         )}
                     </div>
-                    <MessageInput conversation={selectedConversation} />
+                    <MessageInput 
+                        conversation={selectedConversation}
+                        replyTo={replyTo}
+                        onCancelReply={() => setReplyTo(null)}
+                    />
                 </>
             )}
 
@@ -222,6 +234,7 @@ function Home({ selectedConversation = null, messages = null }) {
 Home.layout = (page) => {
     return (
         <AuthenticatedLayout user={page.props.auth.user}>
+            <Head title="Inicio" />
             <ChatLayout children={page} />
         </AuthenticatedLayout>
     );

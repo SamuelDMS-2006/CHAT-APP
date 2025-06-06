@@ -17,6 +17,7 @@ class Message extends Model
         'sender_id',
         'group_id',
         'receiver_id',
+        'reply_to_id',
     ];
 
     public function sender()
@@ -37,5 +38,15 @@ class Message extends Model
     public function attachments()
     {
         return $this->hasMany(MessageAttachment::class);
+    }
+
+    public function replyTo()
+    {
+        return $this->belongsTo(Message::class, 'reply_to_id');
+    }
+
+    public function reactions()
+    {
+        return $this->hasMany(\App\Models\MessageReaction::class);
     }
 }

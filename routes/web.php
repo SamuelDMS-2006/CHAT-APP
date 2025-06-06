@@ -4,8 +4,10 @@ use App\Http\Controllers\ChatUserController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\MessageReactionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -13,7 +15,9 @@ Route::get('/landing', function () {
     return Inertia::render('LandingPage');
 });
 
-Route::post('/chat-users', [ChatUserController::class, 'store']);
+Route::get('/guest-chat', function () {
+    return Inertia::render('GuestChat');
+})->name('guest.chat');
 
 Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('/', [HomeController::class, 'home'])->name('dashboard');
@@ -28,6 +32,14 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::post('/group', [GroupController::class, 'store'])->name('group.store');
     Route::put('/group/{group}', [GroupController::class, 'update'])->name('group.update');
     Route::delete('/group/{group}', [GroupController::class, 'destroy'])->name('group.destroy');
+
+    Route::get('/api/quick-replies', function (Request $request) {
+        $role = $request->query('role', 'asesor');
+        return response()->json(\App\Helpers\QuickReplies::getReplies($role));
+    });
+
+    Route::post('/message/{message}/react', [MessageReactionController::class, 'store']);
+    Route::delete('/message/{message}/react', [MessageReactionController::class, 'destroy']);
 
     Route::middleware(['admin'])->group(function () {
         Route::post('/user', [UserController::class, 'store'])->name('user.store');

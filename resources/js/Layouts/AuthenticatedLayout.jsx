@@ -12,19 +12,25 @@ import { UserPlusIcon } from "@heroicons/react/24/solid";
 import NewUserModal from "@/Components/App/NewUserModal";
 import UserAvatar from "@/Components/App/UserAvatar";
 
+// Componente principal de layout para usuarios autenticados
 export default function Authenticated({ header, children }) {
+    // Obtenemos datos de usuario y conversaciones desde la página actual
     const page = usePage();
     const user = page.props.auth.user;
     const conversations = page.props.conversations;
-    const [showingNavigationDropdown, setShowingNavigationDropdown] =
-        useState(false);
+
+    // Estado para mostrar/ocultar menú de navegación y modal de nuevo usuario
+    const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [showNewUserModal, setShowNewUserModal] = useState(false);
+
+    // EventBus para emitir eventos globales (notificaciones, mensajes, etc)
     const { emit } = useEventBus();
 
+    // Suscripción a canales de Echo para recibir mensajes y eventos en tiempo real
     useEffect(() => {
         conversations.forEach((conversation) => {
+            // Determina el nombre del canal según si es grupo o usuario
             let channel = `message.group.${conversation.id}`;
-
             if (conversation.is_user) {
                 channel = `message.user.${[
                     parseInt(user.id),
@@ -33,22 +39,26 @@ export default function Authenticated({ header, children }) {
                     .sort((a, b) => a - b)
                     .join("-")}`;
             }
-            // console.log("Start listening on channel ", channel);
 
+            // Suscríbete al canal de mensajes
             Echo.private(channel)
                 .error((error) => {
+                    // Manejo de errores de conexión al canal
                     console.error(error);
                 })
                 .listen("SocketMessage", (e) => {
-                    console.log("SocketMessage", e);
+                    // Evento recibido cuando llega un nuevo mensaje por websocket
                     const message = e.message;
-                    // If the conversation with the sender is not selected
-                    // then show a notification
 
+                    // Emitimos evento global para actualizar la UI con el nuevo mensaje
                     emit("message.created", message);
+
+                    // Si el mensaje es del usuario actual, no mostramos notificación
                     if (message.sender_id === user.id) {
                         return;
                     }
+
+                    // Emitimos evento para mostrar notificación de nuevo mensaje
                     emit("newMessageNotification", {
                         user: message.sender,
                         group_id: message.group_id,
@@ -57,27 +67,29 @@ export default function Authenticated({ header, children }) {
                             `Shared ${
                                 message.attachments.length === 1
                                     ? "an attachment"
-                                    : message.attachments.length +
-                                      " attachments"
+                                    : message.attachments.length + " attachments"
                             }`,
                     });
                 });
 
+            // Si la conversación es de grupo, suscríbete también a eventos de eliminación de grupo
             if (conversation.is_group) {
                 Echo.private(`group.deleted.${conversation.id}`)
                     .listen("GroupDeleted", (e) => {
+                        // Emitimos evento global cuando se elimina un grupo
                         emit("group.deleted", { id: e.id, name: e.name });
                     })
                     .error((e) => {
+                        // Manejo de errores de conexión al canal de grupo eliminado
                         console.error(e);
                     });
             }
         });
 
+        // Cleanup: al desmontar o cambiar conversaciones, salimos de los canales
         return () => {
             conversations.forEach((conversation) => {
                 let channel = `message.group.${conversation.id}`;
-
                 if (conversation.is_user) {
                     channel = `message.user.${[
                         parseInt(user.id),
@@ -93,14 +105,17 @@ export default function Authenticated({ header, children }) {
                 }
             });
         };
-    }, [conversations]);
+    }, [conversations]); // Se ejecuta cada vez que cambian las conversaciones
 
     return (
         <>
+            {/* Layout principal de la aplicación */}
             <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col h-screen">
+                {/* Barra de navegación superior */}
                 <nav className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
                     <div className="mx-auto px-4 sm:px-6">
                         <div className="flex justify-between h-16">
+                            {/* Logo de la aplicación */}
                             <div className="flex">
                                 <div className="shrink-0 flex items-center">
                                     <Link href="/">
@@ -109,19 +124,20 @@ export default function Authenticated({ header, children }) {
                                 </div>
                             </div>
 
+                            {/* Botones y menú de usuario (escritorio) */}
                             <div className="hidden sm:flex sm:items-center sm:ms-6">
                                 <div className="flex ms-3 relative">
+                                    {/* Botón para agregar nuevo usuario (solo admin) */}
                                     {user.is_admin && (
                                         <PrimaryButton
-                                            onClick={(ev) =>
-                                                setShowNewUserModal(true)
-                                            }
+                                            onClick={() => setShowNewUserModal(true)}
                                         >
                                             <UserPlusIcon className="h-5 w-5 mr-2" />
                                             Add New User
                                         </PrimaryButton>
                                     )}
 
+                                    {/* Dropdown de usuario */}
                                     <Dropdown>
                                         <Dropdown.Trigger>
                                             <span className="inline-flex rounded-md">
@@ -129,9 +145,9 @@ export default function Authenticated({ header, children }) {
                                                     type="button"
                                                     className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150"
                                                 >
-                                                    <UserAvatar user={user} />
+                                                    <UserAvatar user={user} position="left"/>
                                                     <span className="ml-2">{user.name}</span>
-
+                                                    {/* Flecha del dropdown */}
                                                     <svg
                                                         className="ms-2 -me-0.5 h-4 w-4"
                                                         xmlns="http://www.w3.org/2000/svg"
@@ -142,16 +158,15 @@ export default function Authenticated({ header, children }) {
                                                             fillRule="evenodd"
                                                             d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
                                                             clipRule="evenodd"
-                                                        />
+                                                        />  
                                                     </svg>
                                                 </button>
                                             </span>
                                         </Dropdown.Trigger>
 
+                                        {/* Opciones del dropdown */}
                                         <Dropdown.Content>
-                                            <Dropdown.Link
-                                                href={route("profile.edit")}
-                                            >
+                                            <Dropdown.Link href={route("profile.edit")}>
                                                 Profile
                                             </Dropdown.Link>
                                             <Dropdown.Link
@@ -166,6 +181,7 @@ export default function Authenticated({ header, children }) {
                                 </div>
                             </div>
 
+                            {/* Botón de menú hamburguesa (móvil) */}
                             <div className="-me-2 flex items-center sm:hidden">
                                 <button
                                     onClick={() =>
@@ -175,6 +191,7 @@ export default function Authenticated({ header, children }) {
                                     }
                                     className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out"
                                 >
+                                    {/* Icono de menú */}
                                     <svg
                                         className="h-6 w-6"
                                         stroke="currentColor"
@@ -209,6 +226,7 @@ export default function Authenticated({ header, children }) {
                         </div>
                     </div>
 
+                    {/* Menú de usuario (móvil) */}
                     <div
                         className={
                             (showingNavigationDropdown ? "block" : "hidden") +
@@ -241,6 +259,7 @@ export default function Authenticated({ header, children }) {
                     </div>
                 </nav>
 
+                {/* Header opcional */}
                 {header && (
                     <header className="bg-white dark:bg-gray-800 shadow">
                         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -249,13 +268,17 @@ export default function Authenticated({ header, children }) {
                     </header>
                 )}
 
+                {/* Contenido principal de la página */}
                 {children}
             </div>
+            {/* Componente de notificaciones tipo toast */}
             <Toast />
+            {/* Notificación de nuevo mensaje */}
             <NewMessageNotification />
+            {/* Modal para agregar nuevo usuario */}
             <NewUserModal
                 show={showNewUserModal}
-                onClose={(ev) => setShowNewUserModal(false)}
+                onClose={() => setShowNewUserModal(false)}
             />
         </>
     );

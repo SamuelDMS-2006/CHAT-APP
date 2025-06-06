@@ -14,7 +14,7 @@ export default function Edit({ auth, mustVerifyEmail, status }) {
                 </h2>
             }
         >
-            <Head title="Profile" />
+            <Head title="Perfil" />
 
             <div className="py-12 overflow-y-auto">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">

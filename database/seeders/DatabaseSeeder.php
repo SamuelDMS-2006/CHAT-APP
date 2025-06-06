@@ -36,8 +36,6 @@ class DatabaseSeeder extends Seeder
             'asesor' => 1,
         ]);
 
-        User::factory(10)->create();
-
         for ($i = 0; $i < 5; $i++) {
             $group = Group::factory()->create([
                 'owner_id' => 1,

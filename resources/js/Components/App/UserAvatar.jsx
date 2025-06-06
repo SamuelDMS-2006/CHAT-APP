@@ -1,4 +1,4 @@
-const UserAvatar = ({ user, online = null, profile = false }) => {
+const UserAvatar = ({ user, online = null, profile = false}) => {
     let onlineClass =
         online === true ? "online" : online === false ? "offline" : "";
 
@@ -14,7 +14,10 @@ const UserAvatar = ({ user, online = null, profile = false }) => {
                 </div>
             )}
             {!user.avatar_url && (
-                <div className={`chat-image avatar placeholder ${onlineClass}`}>
+                <div className={
+                    `chat-image avatar placeholder z-10  ${onlineClass}`
+                }
+                >
                     <div
                         className={`bg-gray-400 text-gray-800 rounded-full ${sizeClass}`}
                     >

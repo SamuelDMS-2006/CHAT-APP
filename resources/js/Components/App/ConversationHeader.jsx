@@ -114,7 +114,7 @@ const ConversationHeader = ({ selectedConversation }) => {
                             <ArrowLeftIcon className="w-6" />
                         </Link>
                         {selectedConversation.is_user && (
-                            <UserAvatar user={selectedConversation} />
+                            <UserAvatar user={selectedConversation} absolute="true" position="right"/>
                         )}
                         {selectedConversation.is_group && <GroupAvatar />}
                         <div>
